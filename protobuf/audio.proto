@@ -1,0 +1,8 @@
+syntax = "proto3";
+import "nanopb.proto";
+
+// Our address book file is just one of these.
+message audioMessage {
+    repeated uint32 data = 1 [(nanopb).max_count = 60];
+}
+
