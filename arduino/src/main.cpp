@@ -1,8 +1,19 @@
 #include <Arduino.h>
+#include "HSLtoRGB.h"
+
+#define BAUD_RATE 9600
 
 void setup()
 {
-
+	Serial.begin(BAUD_RATE);
+	RGB_point rgb = HSL_2_RGB( {200, 100, 75} );
+	delay(5000);
+	Serial.print("R: ");
+	Serial.println(rgb.r);
+	Serial.print("G: ");
+	Serial.println(rgb.g);
+	Serial.print("B: ");
+	Serial.println(rgb.b);
 }
 
 void loop()
