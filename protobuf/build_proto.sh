@@ -1,1 +1,1 @@
-protoc audio.proto --nanopb_out=../arduino/src/ --python_out=../raspberrypi/ -I/usr/local/Cellar/nanopb-generator/0.3.6_2/libexec/proto/ -I.
+protoc audio.proto --nanopb_out=../arduino/src/ --nanopb_out=../raspberrypi/c -I/usr/local/Cellar/nanopb-generator/0.3.6_2/libexec/proto/ -I.
