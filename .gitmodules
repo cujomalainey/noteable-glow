@@ -1,0 +1,3 @@
+[submodule "arduino/lib/framr-arduino"]
+	path = arduino/lib/framr-arduino
+	url = https://github.com/cujomalainey/framr-arduino
