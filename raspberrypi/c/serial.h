@@ -2,4 +2,4 @@
 
 void setup_serial();
 
-void send_bytes(void * data, uint16_t size);
+void send_bytes(uint8_t* data, uint8_t size);

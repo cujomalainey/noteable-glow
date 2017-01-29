@@ -3,7 +3,7 @@
 #include <fcntl.h>			//Used for UART
 #include <termios.h>		//Used for UART
 #include "serial.h"
-
+#define MDUINO_START_BYTE 0xA5
 // from http://www.raspberry-projects.com/pi/programming-in-c/uart-serial-port/using-the-uart
 
 int uart0_filestream;
@@ -48,7 +48,7 @@ void setup_serial()
 	//	PARODD - Odd parity (else even)
 	struct termios options;
 	tcgetattr(uart0_filestream, &options);
-	options.c_cflag = B9600 | CS8 | CLOCAL | CREAD;		//<Set baud rate
+	options.c_cflag = B115200 | CS8 | CLOCAL;		//<Set baud rate
 	options.c_iflag = IGNPAR;
 	options.c_oflag = 0;
 	options.c_lflag = 0;
@@ -56,8 +56,25 @@ void setup_serial()
 	tcsetattr(uart0_filestream, TCSANOW, &options);
 }
 
-void send_bytes(void * data, uint16_t size)
+void send_bytes(uint8_t * data, uint8_t size)
 {
+	uint8_t checksum = 0;
+
+	checksum ^= MDUINO_START_BYTE;
+	write(uart0_filestream, &checksum, 1);
+
+	// // send length
+	checksum ^= size;
+	write(uart0_filestream, &size, 1);
+
+	// // Msg id
+	write(uart0_filestream, &size, 1);
+	checksum ^= size;
+
+	for (int i = 0; i < size; i++) {
+		checksum ^= data[i];
+	}
+
 	if (uart0_filestream != -1)
 	{
 		int count = write(uart0_filestream, data, size);		//Filestream, bytes to write, number of bytes to write
@@ -66,4 +83,6 @@ void send_bytes(void * data, uint16_t size)
 			printf("UART TX error\n");
 		}
 	}
+	// // send checksum
+	write(uart0_filestream, &checksum, 1);
 }

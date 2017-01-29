@@ -1,34 +1,59 @@
 #include <Arduino.h>
 #include <Adafruit_NeoPixel.h>
+#include <pb.h>
+#include <pb_decode.h>
 #include "HSLtoRGB.h"
+#include "mduino.h"
+#include "audio.pb.h"
 
 #define LED_PIN   0
-#define BAUD_RATE 9600
+#define BAUD_RATE 115200
 #define SATURATION 100
 #define NUMPIXELS 60
+#define ERROR_PIN 13
 
 #define INTENSITY_TO_HUE (360.0/100)
 
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, LED_PIN, NEO_GRB + NEO_KHZ800);
+uint8_t messageBuffer[256];
+mduino m = mduino();
+OutgoingMessage om = OutgoingMessage();
+audioMessage msg;
 
 void set_pixel(uint8_t i, uint8_t intensity);
 
 void setup()
 {
 	Serial.begin(BAUD_RATE);
+    m.setSerial(Serial);
+    pinMode(ERROR_PIN, OUTPUT);
     pixels.begin();
 }
 
 void loop()
 {
-    int8_t data = Serial.read();
-    if (data > -1)
+    m.readPacket();
+    if (m.getResponse().isAvailable())
     {
-        for (uint8_t i = 0; i < NUMPIXELS; i++)
+        pb_istream_t stream = pb_istream_from_buffer(m.getResponse().getFrameData(), m.getResponse().getFrameLength());
+        if (!pb_decode(&stream, audioMessage_fields, &msg))
         {
-            set_pixel(i, data);
+            // Serial.print("Decode failed: ");
+            // Serial.println(PB_GET_ERROR(&stream));
+            digitalWrite(ERROR_PIN, HIGH);
         }
-        pixels.show();
+        else
+        {
+            for (int i = 0; i < NUMPIXELS; i++)
+            {
+                set_pixel(i, msg.data[i]);
+            }
+            pixels.show();
+        }
+    }
+    else if (m.getResponse().isError())
+    {
+        digitalWrite(ERROR_PIN, HIGH);
     }
 }
 
