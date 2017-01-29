@@ -21,12 +21,15 @@ void setup()
 
 void loop()
 {
+    int8_t data = Serial.read();
+    if (data > -1)
+    {
         for (uint8_t i = 0; i < NUMPIXELS; i++)
         {
-            set_pixel(i, i);
+            set_pixel(i, data);
         }
         pixels.show();
-        delay(50);
+    }
 }
 
 void set_pixel(uint8_t i, uint8_t intensity)
