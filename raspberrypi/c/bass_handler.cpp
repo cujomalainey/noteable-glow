@@ -41,12 +41,16 @@ bool bass_playing()
 void get_bass_transform(uint8_t* spec_buffer)
 {
 	float fft[1024];
-	int y, x;
+	int y1, y, x;
 	BASS_ChannelGetData(chan,fft,BASS_DATA_FFT2048); // get the FFT data
-	for (x=0;x<SPECWIDTH;x++)
+	for (x=0;x<SPECWIDTH;x+=2)
 	{
-		y=sqrt(fft[x+1])*3*SPECHEIGHT-4; // scale it (sqrt to make low values more visible)
+		// y=sqrt(fft[x*2 + 1])*3*SPECHEIGHT-4; // scale it (sqrt to make low values more visible)
+		y=fft[x+1]*10*SPECHEIGHT;
+		y1 = (y1+y)/2;
+		spec_buffer[x] = y1;
+		y1 = y;
 		if (y>SPECHEIGHT) y=SPECHEIGHT; // cap it
-		spec_buffer[x] = y;
+		spec_buffer[x+1] = y;
 	}
 }

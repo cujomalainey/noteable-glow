@@ -2,6 +2,7 @@
 #include <Adafruit_NeoPixel.h>
 #include <pb.h>
 #include <pb_decode.h>
+#include <math.h>
 #include "HSLtoRGB.h"
 #include "mduino.h"
 #include "audio.pb.h"
@@ -12,7 +13,7 @@
 #define NUMPIXELS 60
 #define ERROR_PIN 13
 
-#define INTENSITY_TO_HUE (360.0/100)
+#define INTENSITY_TO_HUE (280.0/100)
 
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, LED_PIN, NEO_GRB + NEO_KHZ800);
 uint8_t messageBuffer[256];
@@ -60,7 +61,7 @@ void loop()
 void set_pixel(uint8_t i, uint8_t intensity)
 {
     uint16_t v1 = (uint16_t)(((double)intensity) * INTENSITY_TO_HUE);
-    RGB_point rgb = HSL_2_RGB( {v1, SATURATION, intensity} );
+    RGB_point rgb = HSL_2_RGB( {v1, SATURATION, (uint8_t)(15*log10(intensity+1))} );
     pixels.setPixelColor(i,pixels.Color(rgb.r, rgb.g, rgb.b));
 }
 
